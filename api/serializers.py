@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from api.models import User
+from api.models import User, File
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -21,3 +21,11 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         instance.save()
         return instance
+
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = 'user, name, base64'
+        extra_kwargs = {
+            "base64": {"write_only": True}
+        }

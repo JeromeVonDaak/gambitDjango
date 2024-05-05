@@ -7,7 +7,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from api.models import User
-from api.serializers import UserSerializer
+from api.serializers import UserSerializer, FileSerializer
 import jwt, datetime
 
 from gambitBackend import settings
@@ -78,6 +78,23 @@ class CheckIfAuthenticated(APIView):
         tokenmanager = TokenManger(token)
         if(tokenmanager.isValid()):
             return Response(tokenmanager.getSerializer().data, status=status.HTTP_200_OK)
+        return Response({"error": f"Please log in again your token: {token} is not valid"}, status=status.HTTP_400_BAD_REQUEST)
+
+class UploadFile(APIView):
+    def post(self, request):
+        token = request.data['jwt']
+        tokenmanager = TokenManger(token)
+        if(tokenmanager.isValid()):
+            data = {
+                "user": tokenmanager.getUser(),
+                "name": request.data['name'],
+                "base64": request.data['base64'],
+            }
+
+            fileserializer = FileSerializer(data=data)
+            if fileserializer.is_valid():
+                fileserializer.save()
+                return Response(fileserializer, status=status.HTTP_200_OK)
         return Response({"error": f"Please log in again your token: {token} is not valid"}, status=status.HTTP_400_BAD_REQUEST)
 
 
