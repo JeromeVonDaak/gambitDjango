@@ -90,7 +90,6 @@ class UploadFile(APIView):
                 "name": request.data['name'],
                 "base64": request.data['base64'],
             }
-            print(request.data)
             fileserializer = FileSerializer(data=data)
 
             if fileserializer.is_valid():
