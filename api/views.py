@@ -95,7 +95,9 @@ class UploadFile(APIView):
             if fileserializer.is_valid():
                 fileserializer.save()
                 return Response(fileserializer, status=status.HTTP_200_OK)
-        return Response({"error": f"Please log in again your token: {token} is not valid"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"error": f"Please log in again your token: {token} is not valid"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": f"The File Post was not valid"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetJavaCommunicationManagerVersion(APIView):
