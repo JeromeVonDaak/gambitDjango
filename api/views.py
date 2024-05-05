@@ -92,6 +92,7 @@ class UploadFile(APIView):
             }
 
             fileserializer = FileSerializer(data=data)
+            print(fileserializer.data)
             if fileserializer.is_valid():
                 fileserializer.save()
                 return Response(fileserializer, status=status.HTTP_200_OK)
