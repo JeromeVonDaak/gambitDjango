@@ -25,7 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = 'user, name, base64'
+        fields = ['user', 'name', 'base64']
         extra_kwargs = {
             "base64": {"write_only": True}
         }
