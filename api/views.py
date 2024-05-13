@@ -144,7 +144,7 @@ class GetFile(APIView):
         fileid = int(request.data['fileid'])
         tokenmanager = TokenManger(token)
         tokenserializer = TokenSerializer(data={"jwt": request.data['jwt']})
-        if tokenserializer.is_valid() and tokenmanager.isValid() and fileid.is_integer():
+        if tokenserializer.is_valid() and tokenmanager.isValid() and fileid != None:
             userid = tokenmanager.getUser().id
             file = File.objects.get(fileid=fileid)
             # Checks if the User owns the File
