@@ -1,13 +1,14 @@
 import json
 
 from django.shortcuts import render
+from django.core import serializers
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.models import User
-from api.serializers import UserSerializer, FileSerializer
+from api.models import User, Filebase, Imagebase, File
+from api.serializers import UserSerializer, FileUploadSerializer, FileSerializer, TokenSerializer
 import jwt, datetime
 
 from gambitBackend import settings
@@ -42,6 +43,10 @@ class TokenManger:
 
     def isValid(self):
         return self.valid
+
+class FileUploader:
+    def __init__(self, file):
+        self.file = file
 
 
 class RegisterView(APIView):
@@ -82,24 +87,78 @@ class CheckIfAuthenticated(APIView):
 
 class UploadFile(APIView):
     def post(self, request):
+        data = {
+            "jwt": request.data['jwt'],
+            "name": request.data['name'],
+            "filebase64": request.data['filebase64'],
+            "imagebase64": request.data['imagebase64']
+        }
+        fileserializer = FileUploadSerializer(data=data)
+
+        if fileserializer.is_valid():
+            token = request.data['jwt']
+            tokenmanager = TokenManger(token)
+
+            user = tokenmanager.getUser()
+            userid = user.id
+
+
+            filebase = Filebase(base64=request.data['filebase64'])
+            filebase = filebase.save()
+            filebaseid = Filebase.objects.latest('id').id
+
+            imagebase = Imagebase(base64=request.data['imagebase64'])
+            imagebase = imagebase.save()
+            imagebaseid = Imagebase.objects.latest('id').id
+
+            print(f'filebaseid: {filebaseid}, imagebaseid: {imagebaseid}')
+            file = File(name=request.data['name'], userid=userid, fileid=filebaseid, imageid=imagebaseid)
+            file.save()
+
+            if tokenmanager.isValid():
+                return Response(fileserializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": f"Please log in again your token: {token} is not valid"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": f"The File Post was not valid"}, status=status.HTTP_400_BAD_REQUEST)
+
+class GetUserFiles(APIView):
+    def post(self, request):
         token = request.data['jwt']
         tokenmanager = TokenManger(token)
-        if(tokenmanager.isValid()):
-            data = {
-                "user": tokenmanager.getUser(),
-                "name": request.data['name'],
-                "base64": request.data['base64'],
-            }
-            fileserializer = FileSerializer(data=data)
+        tokenserializer = TokenSerializer(data={"jwt": request.data['jwt']})
+        if tokenserializer.is_valid() and tokenmanager.isValid():
+            userid = tokenmanager.getUser().id
+            print(userid)
+            files = File.objects.filter(userid=userid)
+            print(files.values())
+            data = {"files": []}
+            for file in files.values():
+                data['files'].append(file)
+            return Response(data, status=status.HTTP_200_OK)
+        return Response({"error": f"Something went wrong !"}, status=status.HTTP_400_BAD_REQUEST)
 
-            if fileserializer.is_valid():
-                fileserializer.save()
-                return Response(fileserializer, status=status.HTTP_200_OK)
-        else:
-            return Response({"error": f"Please log in again your token: {token} is not valid"}, status=status.HTTP_400_BAD_REQUEST)
-        return Response({"error": f"The File Post was not valid"}, status=status.HTTP_400_BAD_REQUEST)
+class GetFile(APIView):
+    def post(self, request):
+        print(request.data['jwt'])
+        token = request.data['jwt']
+        fileid = int(request.data['fileid'])
+        tokenmanager = TokenManger(token)
+        tokenserializer = TokenSerializer(data={"jwt": request.data['jwt']})
+        if tokenserializer.is_valid() and tokenmanager.isValid() and fileid.is_integer():
+            userid = tokenmanager.getUser().id
+            file = File.objects.get(fileid=fileid)
+            # Checks if the User owns the File
+            print(f'fileid: {file.userid}/userid: {userid}')
+            if int(file.userid) == userid:
+                # the base64 of the file
+                filebase = Filebase.objects.get(id=fileid)
+                # the base64 of the image
+                coverimage = Imagebase.objects.get(id=fileid)
+                data = {'filename': file.name, 'filebase': filebase.base64, 'imagebase': coverimage.base64}
+                return Response(data, status=status.HTTP_200_OK)
+        return Response({"error": f"Something went wrong !"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetJavaCommunicationManagerVersion(APIView):
     def get(self, request):
-        return Response({"version": settings.JAVA_COMMUNICATION_MANAGER_VER},  status=status.HTTP_200_OK)
+        return Response({"version": settings.JAVA_COMMUNICATION_MANAGER_VER, "download": settings.JAVA_COMMUNICATION_MANAGER_DOWNLOAD},  status=status.HTTP_200_OK)

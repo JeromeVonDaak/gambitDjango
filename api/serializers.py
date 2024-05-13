@@ -22,7 +22,17 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+class FileUploadSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    jwt = serializers.CharField()
+    imagebase64 = serializers.CharField()
+    filebase64 = serializers.CharField()
+
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ['user', 'name', 'base64']
+        fields = '__all__'
+
+class TokenSerializer(serializers.Serializer):
+    jwt = serializers.CharField()
+

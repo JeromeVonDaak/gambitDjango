@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 
 JAVA_COMMUNICATION_MANAGER_VER = "1.0"
+JAVA_COMMUNICATION_MANAGER_DOWNLOAD = ""
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,7 @@ SECRET_KEY = 'django-insecure-^8!1fh32w%%ul8n@k*dsmjmllt1o*qisoose-_5fddo&f&1*yf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['185.218.125.107']
+ALLOWED_HOSTS = ['185.218.125.107',  '127.0.0.1']
 
 
 # Application definition
