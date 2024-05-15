@@ -147,10 +147,12 @@ class GetFile(APIView):
             file = File.objects.get(fileid=fileid)
             # Checks if the User owns the File
             if int(file.userid) == userid:
+                print("got it!")
                 # the base64 of the file
                 filebase = Filebase.objects.get(id=fileid)
                 # the base64 of the image
                 coverimage = Imagebase.objects.get(id=fileid)
+                print("got Data!")
                 data = {'filename': file.name, 'filebase': filebase.base64, 'imagebase': coverimage.base64}
                 return Response(data, status=status.HTTP_200_OK)
         return Response({"error": f"Something went wrong !"}, status=status.HTTP_400_BAD_REQUEST)
