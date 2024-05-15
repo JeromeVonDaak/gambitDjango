@@ -130,9 +130,7 @@ class GetUserFiles(APIView):
         tokenserializer = TokenSerializer(data={"jwt": request.data['jwt']})
         if tokenserializer.is_valid() and tokenmanager.isValid():
             userid = tokenmanager.getUser().id
-            print(userid)
             files = File.objects.filter(userid=userid)
-            print(files.values())
             data = {"files": []}
             for file in files.values():
                 data['files'].append(file)
