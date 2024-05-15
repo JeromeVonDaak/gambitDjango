@@ -59,7 +59,6 @@ class RegisterView(APIView):
 
 class LoginView(APIView):
     def post(self, request):
-        print(str(request.data))
         email = request.data['email']
         password = request.data['password']
 
@@ -139,7 +138,6 @@ class GetUserFiles(APIView):
 
 class GetFile(APIView):
     def post(self, request):
-        print(request.data['jwt'])
         token = request.data['jwt']
         fileid = int(request.data['fileid'])
         tokenmanager = TokenManger(token)
@@ -148,7 +146,6 @@ class GetFile(APIView):
             userid = tokenmanager.getUser().id
             file = File.objects.get(fileid=fileid)
             # Checks if the User owns the File
-            print(f'fileid: {file.userid}/userid: {userid}')
             if int(file.userid) == userid:
                 # the base64 of the file
                 filebase = Filebase.objects.get(id=fileid)
