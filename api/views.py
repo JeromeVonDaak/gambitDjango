@@ -112,12 +112,13 @@ class UploadFile(APIView):
             imagebase = imagebase.save()
             imagebaseid = Imagebase.objects.latest('id').id
 
-            print(f'filebaseid: {filebaseid}, imagebaseid: {imagebaseid}')
+            print("saved file!")
+
             file = File(name=request.data['name'], userid=userid, fileid=filebaseid, imageid=imagebaseid)
             file.save()
 
             if tokenmanager.isValid():
-                return Response(fileserializer.data, status=status.HTTP_200_OK)
+                return Response({"succsess": "Uploaded the File!"}, status=status.HTTP_200_OK)
             else:
                 return Response({"error": f"Please log in again your token: {token} is not valid"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"error": f"The File Post was not valid"}, status=status.HTTP_400_BAD_REQUEST)
