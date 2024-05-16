@@ -112,6 +112,8 @@ class UploadFile(APIView):
             with open("static/" + nameimage + ".bs64", "w") as f:
                 f.write(request.data['imagebase64'])
 
+            print(settings.BASE_DIR)
+
 
             file = File(name=request.data['name'], userid=userid, fileid=namefile, imageid=nameimage)
             file.save()
