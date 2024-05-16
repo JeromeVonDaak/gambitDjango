@@ -1,4 +1,6 @@
 import json
+import string
+import random
 
 from django.shortcuts import render
 from django.core import serializers
@@ -102,18 +104,16 @@ class UploadFile(APIView):
             user = tokenmanager.getUser()
             userid = user.id
 
+            namefile = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
+            with open("static/" + namefile + ".bs64", "w") as f:
+                f.write(request.data['filebase64'])
 
-            filebase = Filebase(base64=request.data['filebase64'])
-            filebase = filebase.save()
-            filebaseid = Filebase.objects.latest('id').id
+            nameimage = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
+            with open("static/" + nameimage + ".bs64", "w") as f:
+                f.write(request.data['imagebase64'])
 
-            imagebase = Imagebase(base64=request.data['imagebase64'])
-            imagebase = imagebase.save()
-            imagebaseid = Imagebase.objects.latest('id').id
 
-            print("saved file!")
-
-            file = File(name=request.data['name'], userid=userid, fileid=filebaseid, imageid=imagebaseid)
+            file = File(name=request.data['name'], userid=userid, fileid=namefile, imageid=nameimage)
             file.save()
 
             if tokenmanager.isValid():
@@ -134,27 +134,6 @@ class GetUserFiles(APIView):
             for file in files.values():
                 data['files'].append(file)
             return Response(data, status=status.HTTP_200_OK)
-        return Response({"error": f"Something went wrong !"}, status=status.HTTP_400_BAD_REQUEST)
-
-class GetFile(APIView):
-    def post(self, request):
-        token = request.data['jwt']
-        fileid = int(request.data['fileid'])
-        tokenmanager = TokenManger(token)
-        tokenserializer = TokenSerializer(data={"jwt": request.data['jwt']})
-        if tokenserializer.is_valid() and tokenmanager.isValid() and fileid != None:
-            userid = tokenmanager.getUser().id
-            file = File.objects.get(fileid=fileid)
-            # Checks if the User owns the File
-            if int(file.userid) == userid:
-                print("got it!")
-                # the base64 of the file
-                filebase = Filebase.objects.get(id=fileid)
-                # the base64 of the image
-                coverimage = Imagebase.objects.get(id=fileid)
-                print("got Data!")
-                data = {'filename': file.name, 'filebase': filebase.base64, 'imagebase': coverimage.base64}
-                return Response(data, status=status.HTTP_200_OK)
         return Response({"error": f"Something went wrong !"}, status=status.HTTP_400_BAD_REQUEST)
 
 

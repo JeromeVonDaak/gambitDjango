@@ -8,6 +8,5 @@ urlpatterns = [
     path('checkvalid/', CheckIfAuthenticated.as_view(), name='checkvalid'),
     path('uploadfile/', UploadFile.as_view(), name='uploadfile'),
     path('getuserfiles/', GetUserFiles.as_view(), name='getuserfiles'),
-    path('getfile/', GetFile.as_view(), name='getfile'),
     path('checkcommunicationmanagerversion/', GetJavaCommunicationManagerVersion.as_view(), name='checkcommunicationmanagerversion')
 ]
