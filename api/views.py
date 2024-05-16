@@ -105,11 +105,11 @@ class UploadFile(APIView):
             userid = user.id
 
             namefile = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
-            with open(settings.BASE_DIR + "static/" + namefile + ".bs64", "w") as f:
+            with open("/home/yggdrasil/gambitDjango/static/" + namefile + ".bs64", "w") as f:
                 f.write(request.data['filebase64'])
 
             nameimage = ''.join(random.choices(string.ascii_uppercase + string.digits, k=20))
-            with open(settings.BASE_DIR + "static/" + nameimage + ".bs64", "w") as f:
+            with open("/home/yggdrasil/gambitDjango/static/" + nameimage + ".bs64", "w") as f:
                 f.write(request.data['imagebase64'])
 
 
