@@ -150,9 +150,9 @@ class DeleteUserFile(APIView):
 
             if str(file.userid) == str(userid):
                 file.delete()
-                return Response("File Deleted", status=status.HTTP_200_OK)
-            return Response("The requested file is not yours!", status=status.HTTP_400_BAD_REQUEST)
-        return Response("something went wrong !", status=status.HTTP_400_BAD_REQUEST)
+                return Response({"msg": "File Deleted"}, status=status.HTTP_200_OK)
+            return Response({"msg": "The requested file is not yours!"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"msg": "something went wrong !"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
