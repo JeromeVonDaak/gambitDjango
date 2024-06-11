@@ -145,7 +145,8 @@ class DeleteUserFile(APIView):
         if tokenserializer.is_valid():
             userid = tokenmanager.getUser().id
             fileid = request.data['fileid']
-            file = get_object_or_404(File, fileid)
+            file = File.objects.filter(fileid=fileid)
+            file = file[0]
             if file.userid == userid:
                 file.delete()
                 return Response("File Deleted", status=status.HTTP_200_OK)
