@@ -137,7 +137,7 @@ class GetUserFiles(APIView):
         return Response({"error": f"Something went wrong !"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class DeleteUserFile:
+class DeleteUserFile(APIView):
     def post(self, request):
         token = request.data['jwt']
         tokenmanager = TokenManger(token)
