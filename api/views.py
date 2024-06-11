@@ -2,7 +2,7 @@ import json
 import string
 import random
 
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core import serializers
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
@@ -135,6 +135,25 @@ class GetUserFiles(APIView):
                 data['files'].append(file)
             return Response(data, status=status.HTTP_200_OK)
         return Response({"error": f"Something went wrong !"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DeleteUserFile:
+    def post(self, request):
+        token = request.data['jwt']
+        tokenmanager = TokenManger(token)
+        tokenserializer = TokenSerializer(data={"jwt": request.data['jwt']})
+        if tokenserializer.is_valid():
+            userid = tokenmanager.getUser().id
+            fileid = request.data['fileid']
+            file = get_object_or_404(File, fileid)
+            if file.id == userid:
+                file.delete()
+                return Response("File Deleted", status=status.HTTP_200_OK)
+            return Response("The requested file is not yours!", status=status.HTTP_400_BAD_REQUEST)
+        return Response("Something went wrong !", status=status.HTTP_400_BAD_REQUEST)
+
+
+
 
 
 class GetJavaCommunicationManagerVersion(APIView):
