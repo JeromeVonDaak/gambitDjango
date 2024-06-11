@@ -146,7 +146,7 @@ class DeleteUserFile:
             userid = tokenmanager.getUser().id
             fileid = request.data['fileid']
             file = get_object_or_404(File, fileid)
-            if file.id == userid:
+            if file.userid == userid:
                 file.delete()
                 return Response("File Deleted", status=status.HTTP_200_OK)
             return Response("The requested file is not yours!", status=status.HTTP_400_BAD_REQUEST)
