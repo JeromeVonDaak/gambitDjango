@@ -147,9 +147,8 @@ class DeleteUserFile(APIView):
             fileid = request.data['fileid']
             file = File.objects.filter(fileid=fileid)
             file = file[0]
-            print(file.userid)
-            print(userid)
-            if file.userid == userid:
+
+            if str(file.userid) == str(userid):
                 file.delete()
                 return Response("File Deleted", status=status.HTTP_200_OK)
             return Response("The requested file is not yours!", status=status.HTTP_400_BAD_REQUEST)
