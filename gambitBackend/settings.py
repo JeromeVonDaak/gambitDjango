@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 
-JAVA_COMMUNICATION_MANAGER_VER = "1.2"
+JAVA_COMMUNICATION_MANAGER_VER = "1.4"
 JAVA_COMMUNICATION_MANAGER_DOWNLOAD = ""
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
