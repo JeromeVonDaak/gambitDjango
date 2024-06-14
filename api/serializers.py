@@ -28,11 +28,6 @@ class FileUploadSerializer(serializers.Serializer):
     imagebase64 = serializers.CharField()
     filebase64 = serializers.CharField()
 
-class FileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = File
-        fields = '__all__'
-
 class TokenSerializer(serializers.Serializer):
     jwt = serializers.CharField()
 

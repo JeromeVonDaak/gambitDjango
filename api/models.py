@@ -2,8 +2,15 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 # Create your models here.
 
-# User Model to Login and auth
 class User(AbstractUser):
+    """
+    Custom user model.
+    Not all fields from Django user just:
+        - name
+        - email
+        - password
+    Password is Hashed with argon2
+    """
     name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=255)
@@ -16,6 +23,9 @@ class User(AbstractUser):
         return self.email
 
 class File(models.Model):
+    """
+    Model for all the file Data
+    """
     # id of the file itself
     id = models.BigAutoField(primary_key=True, auto_created=True)
     # the display name of the file
@@ -30,17 +40,3 @@ class File(models.Model):
 
     def __str__(self):
         return self.name
-
-class Filebase(models.Model):
-    id = models.BigAutoField(primary_key=True, auto_created=True)
-    base64 = models.TextField()
-
-    def __str__(self):
-        return self.id
-
-class Imagebase(models.Model):
-    id = models.BigAutoField(primary_key=True, auto_created=True)
-    base64 = models.TextField()
-
-    def __str__(self):
-        return self.id
