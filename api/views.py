@@ -1,56 +1,22 @@
-import json
-import string
 import random
+import string
 
-from django.shortcuts import render, get_object_or_404
-from django.core import serializers
+import datetime
+import jwt
 from rest_framework import status
-from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from api.models import User, Filebase, Imagebase, File
-from api.serializers import UserSerializer, FileUploadSerializer, FileSerializer, TokenSerializer
-import jwt, datetime
-
+from api.models import User, File
+from api.serializers import UserSerializer, FileUploadSerializer, TokenSerializer
 from gambitBackend import settings
+from .TokenManager import TokenManger, token_required
 
-
-# Create your views here.
-
-class TokenManger:
-    def __init__(self, token):
-        self.token = token
-        self.user = None
-        self.serializer = None
-        self.valid = self.validate()
-
-
-    def validate(self):
-        try:
-            payload = jwt.decode(self.token, settings.SECRET_KEY, algorithms=['HS256'])
-        except:
-            return False
-
-        self.serializer = UserSerializer(User.objects.filter(id=payload['id']).first())
-        self.user = User.objects.filter(id=payload['id']).first()
-
-        return True
-
-    def getUser(self):
-        return self.user
-
-    def getSerializer(self):
-        return self.serializer
-
-    def isValid(self):
-        return self.valid
-
-class FileUploader:
-    def __init__(self, file):
-        self.file = file
-
-
+"""
+============================================================================================
+                                AUTHENTICATION
+============================================================================================
+"""
 class RegisterView(APIView):
     def post(self, request):
         serializer = UserSerializer(data=request.data)
@@ -79,14 +45,22 @@ class LoginView(APIView):
         return Response({"error": "Login Failed"}, status=status.HTTP_400_BAD_REQUEST)
 
 class CheckIfAuthenticated(APIView):
+    @token_required()
     def post(self, request):
-        token = request.data['jwt']
-        tokenmanager = TokenManger(token)
-        if(tokenmanager.isValid()):
-            return Response(tokenmanager.getSerializer().data, status=status.HTTP_200_OK)
-        return Response({"error": f"Please log in again your token: {token} is not valid"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"msg": "Successfully logged in"}, status=status.HTTP_200_OK)
 
+"""
+============================================================================================
+"""
+
+
+"""
+============================================================================================
+                                FILE MANIPULATION
+============================================================================================
+"""
 class UploadFile(APIView):
+    @token_required()
     def post(self, request):
         data = {
             "jwt": request.data['jwt'],
@@ -116,18 +90,16 @@ class UploadFile(APIView):
             file = File(name=request.data['name'], userid=userid, fileid=namefile, imageid=nameimage)
             file.save()
 
-            if tokenmanager.isValid():
-                return Response({"succsess": "Uploaded the File!"}, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": f"Please log in again your token: {token} is not valid"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"succsess": "Uploaded the File!"}, status=status.HTTP_200_OK)
         return Response({"error": f"The File Post was not valid"}, status=status.HTTP_400_BAD_REQUEST)
 
 class GetUserFiles(APIView):
+    @token_required()
     def post(self, request):
         token = request.data['jwt']
-        tokenmanager = TokenManger(token)
         tokenserializer = TokenSerializer(data={"jwt": request.data['jwt']})
-        if tokenserializer.is_valid() and tokenmanager.isValid():
+        if tokenserializer.is_valid():
+            tokenmanager = TokenManger(token)
             userid = tokenmanager.getUser().id
             files = File.objects.filter(userid=userid)
             data = {"files": []}
@@ -138,11 +110,13 @@ class GetUserFiles(APIView):
 
 
 class DeleteUserFile(APIView):
+    @token_required()
     def post(self, request):
         token = request.data['jwt']
-        tokenmanager = TokenManger(token)
         tokenserializer = TokenSerializer(data={"jwt": request.data['jwt']})
         if tokenserializer.is_valid():
+
+            tokenmanager = TokenManger(token)
             userid = tokenmanager.getUser().id
             fileid = request.data['fileid']
             file = File.objects.filter(fileid=fileid)
@@ -154,10 +128,10 @@ class DeleteUserFile(APIView):
             return Response({"msg": "The requested file is not yours!"}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"msg": "something went wrong !"}, status=status.HTTP_400_BAD_REQUEST)
 
-
-
-
-
 class GetJavaCommunicationManagerVersion(APIView):
     def get(self, request):
         return Response({"version": settings.JAVA_COMMUNICATION_MANAGER_VER, "download": settings.JAVA_COMMUNICATION_MANAGER_DOWNLOAD},  status=status.HTTP_200_OK)
+
+"""
+============================================================================================
+"""
